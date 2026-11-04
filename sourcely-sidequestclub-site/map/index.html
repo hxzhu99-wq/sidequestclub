@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Where to find factories in China: an interactive cluster map | Side Quest Club</title>
+<meta name="description" content="An interactive map of China's big manufacturing clusters by product type, for people starting their own brand.">
+<link rel="canonical" href="https://YOUR-DOMAIN.com/map/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Side Quest Club">
+<meta property="og:title" content="Where to find factories in China: an interactive cluster map | Side Quest Club">
+<meta property="og:description" content="An interactive map of China's big manufacturing clusters by product type, for people starting their own brand.">
+<meta property="og:url" content="https://YOUR-DOMAIN.com/map/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Inter:wght@400;500;700&family=Permanent+Marker&display=swap">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body data-page="map">
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="/" aria-label="Side Quest Club, by Sourcely, home"><span>Side Quest</span> Club<small style="display:block;font:500 .75rem var(--body);letter-spacing:.12em;text-transform:uppercase;margin-top:2px;transform:none">by Sourcely</small></a>
+  <nav aria-label="Main">
+    <a href="/" data-nav="home">Home</a>
+    <a href="/ideas/" data-nav="ideas">10 ideas</a>
+    <a href="/test/" data-nav="test">Test for $50</a>
+    <a href="/map/" data-nav="map">Factory map</a>
+    <button class="btn solid" type="button" id="joinBtn" style="padding:4px 12px">Join free</button>
+  </nav>
+</header>
+<main>
+<section class="view" data-view="map">
+  <a class="back" href="/">← Home</a>
+  <span class="label">Interactive · 4 min</span>
+  <h1 style="margin-block:10px 14px;max-width:16ch">The factory map</h1>
+  <p class="intro" style="max-width:62ch;font-size:1.2rem">If you are looking for starting your own brands, here is what you need to know about where to find high quality "made in China" factories.</p>
+  <p style="max-width:62ch;margin-top:12px">China's factories are not spread evenly. Each region has clusters of makers in one kind of product. If you know where your product is made, your search gets much shorter.</p>
+  <div class="actions" data-a="map"></div>
+  <div class="mapwrap">
+    <div class="chips" id="chips" role="group" aria-label="Filter by product type"></div>
+    <div class="maplay">
+      <div class="mapbox">
+        <svg id="map" viewBox="0 0 720 520" role="group" aria-label="Simplified map of mainland China with factory clusters"></svg>
+      </div>
+      <aside class="detail" id="detail" aria-live="polite"></aside>
+    </div>
+    <p class="fine" style="margin-top:14px;max-width:80ch">Simplified, hand-drawn map for orientation only. Marker positions are approximate, and each cluster covers a wider area than its dot. This shows where industries gather, not which factories are good. Verify any supplier yourself before paying.</p>
+  </div>
+  <article id="art-map" style="margin-top:34px">
+    <h2>How to use this</h2>
+    <p><b>1. Pick your product type.</b> Use the filters to see the clusters near your product.</p>
+    <p><b>2. Search with a place name.</b> Add the city to your search, for example “silicone kitchenware Foshan”.</p>
+    <p><b>3. Ask who makes it.</b> Many sellers in big markets are traders, not makers. Ask which factory produces your item. See <a href="/test/">how to test an idea first</a>.</p>
+    <div class="day endday" aria-label="Day 001 mapped"><b>DAY<br>001</b><div class="stamp" aria-hidden="true">MAPPED<br>nice.</div><small>Know where it's made.</small></div>
+  </article>
+</section>
+</main>
+<dialog id="joinDlg" aria-labelledby="joinTitle">
+  <div class="dbody">
+    <button class="x" type="button" id="joinX" aria-label="Close">✕</button>
+    <h3 id="joinTitle" style="font-size:1.6rem">Join Side Quest Club</h3>
+    <p style="margin:8px 0 14px">Free. Make an account to save guides and like posts, and get the newsletter if you want it.</p>
+    <div class="signup-slot" data-dialog="1"></div>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+<footer class="site">
+  <span>Side Quest Club. By Sourcely.<br>© 2026 Sourcely. All rights reserved.</span>
+  <span><a href="/ideas/">10 ideas</a> · <a href="/test/">Test for $50</a> · <a href="/map/">Factory map</a> · <a href="/privacy/">Privacy</a></span>
+</footer>
+</div>
+<script src="/assets/app.js"></script>
+</body>
+</html>
