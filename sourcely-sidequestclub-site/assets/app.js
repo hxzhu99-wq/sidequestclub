@@ -87,8 +87,8 @@
 
   /* ---------- likes, saves, share, comments, sign-up ---------- */
   var BASE=location.href.split('#')[0];
-  /* Paste your form or newsletter endpoint here (see README). Empty = sign-ups show a 'coming soon' note. */
-  var SIGNUP_ENDPOINT='';
+  /* Paste your sign-up endpoint here (see README). Empty = sign-ups show a 'coming soon' note. */
+  var SIGNUP_ENDPOINT='https://script.google.com/macros/s/AKfycbzsehEV7gMd_Se-cc1NnHOnP_FbSXqxSJfgXA8fo4Sp9_C2dGFQXBFaWfLCZPCQYofK1A/exec';
   var ARTS={ideas:'10 ideas to kick off your tiny business today',test:'3 ways to test an idea for under $50',map:'The factory map'};
   var S={db:null,uid:null,canWrite:false,comments:null,likeCount:{},mine:{},saved:{},signup:null,busy:{}};
   function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
@@ -117,21 +117,20 @@
   function signupInner(inDlg){
     var s=S.signup;
     if(s){
-      return (inDlg?'':'<h3>You are in ✓</h3>')+'<p>Account: <b>'+esc(s.email)+'</b><br>Newsletter: <b>'+(s.newsletter?'on':'off')+'</b></p>'+
-        (S.db?'<button class="btn" type="button" data-act="news">'+(s.newsletter?'Turn newsletter off':'Turn newsletter on')+'</button>':'')+'<div class="smsg" role="status"></div>';
+      return (inDlg?'':'<h3>You are on the list ✓</h3>')+'<p>We have <b>'+esc(s.email)+'</b>. We will email you when new guides go live.</p><div class="smsg" role="status"></div>';
     }
-    return (inDlg?'':'<h3>Get the free newsletter</h3><p>New guides and tiny tests, plus a free account to like, save and comment.</p>')+
+    return (inDlg?'':'<h3>Get new guides first</h3><p>Leave your email and we will let you know when the next guide goes live. Free.</p>')+
       '<form class="sform" novalidate><input type="text" name="name" placeholder="First name (optional)" autocomplete="given-name" aria-label="First name">'+
       '<input type="email" name="email" required placeholder="you@email.com" autocomplete="email" aria-label="Email address">'+
-      '<label class="chk"><input type="checkbox" name="news" checked> <span>Send me the free newsletter</span></label>'+
-      '<button class="btn" type="submit">Create free account</button></form><div class="smsg" role="status"></div>';
+      '<button class="btn" type="submit">Join the list</button></form><div class="smsg" role="status"></div>'+
+      '<p style="margin:10px 0 0;font-size:.85rem;opacity:.8">We only use your email to tell you about Side Quest Club.</p>';
   }
   function renderSignup(){
     [].forEach.call(document.querySelectorAll('.signup-slot'),function(slot){
       var d=slot.hasAttribute('data-dialog');
       slot.innerHTML=d?signupInner(true):'<div class="signup">'+signupInner(false)+'</div>';
     });
-    document.getElementById('joinBtn').textContent=S.signup?'Account ✓':'Join free';
+    document.getElementById('joinBtn').textContent=S.signup?'On the list ✓':'Join the list';
   }
   function msg(el,t){var m=el&&el.querySelector?el.querySelector('.smsg'):null; if(m) m.textContent=t; else toast(t);}
 
@@ -181,7 +180,7 @@
     if(SIGNUP_ENDPOINT){
       var b0=form.querySelector('button[type=submit]'); b0.disabled=true;
       try{
-        var rec={email:email.slice(0,120),name:name,newsletter:!!form.elements.news.checked,source:cur};
+        var rec={email:email.slice(0,120),name:name,newsletter:true,source:cur};
         var res=await fetch(SIGNUP_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(rec)});
         if(!res.ok) throw new Error('bad');
         S.signup=rec; lsSet('sqc_signup',rec); renderSignup(); toast('Welcome to the club.');
@@ -191,7 +190,7 @@
     if(!S.db||!S.uid||!S.canWrite){msg(holder,'Sign-ups are opening soon. Please check back shortly.');return;}
     var btn=form.querySelector('button[type=submit]'); btn.disabled=true;
     var v=cur;
-    var ok=await writeDoc('signups/'+S.uid,{email:email.slice(0,120),name:name,newsletter:!!form.elements.news.checked,createdAt:new Date().toISOString(),source:v},false);
+    var ok=await writeDoc('signups/'+S.uid,{email:email.slice(0,120),name:name,newsletter:true,createdAt:new Date().toISOString(),source:v},false);
     btn.disabled=false;
     if(!ok){msg(holder,'Could not save. Please try again.');return;}
     toast('Welcome to the club.');
