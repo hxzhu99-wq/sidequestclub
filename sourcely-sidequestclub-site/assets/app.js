@@ -89,7 +89,8 @@
   var BASE=location.href.split('#')[0];
   /* Paste your sign-up endpoint here (see README). Empty = sign-ups show a 'coming soon' note. */
   var SIGNUP_ENDPOINT='https://script.google.com/macros/s/AKfycbzsehEV7gMd_Se-cc1NnHOnP_FbSXqxSJfgXA8fo4Sp9_C2dGFQXBFaWfLCZPCQYofK1A/exec';
-  var ARTS={ideas:'10 ideas to kick off your tiny business today',test:'3 ways to test an idea for under $50',map:'The factory map'};
+  var ARTS={ideas:'10 ideas to kick off your tiny business today',test:'3 ways to test an idea for under $50',map:'The factory map',career:'Career minimalism: what if the ladder isn\'t the goal?'};
+  window.sqcSetArt=function(k,t){ARTS[k]=t;}; window.sqcRefresh=function(){renderActions();};
   var S={db:null,uid:null,canWrite:false,comments:null,likeCount:{},mine:{},saved:{},signup:null,busy:{}};
   function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
   function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
@@ -117,20 +118,21 @@
   function signupInner(inDlg){
     var s=S.signup;
     if(s){
-      return (inDlg?'':'<h3>You are on the list ✓</h3>')+'<p>We have <b>'+esc(s.email)+'</b>. We will email you when new guides go live.</p><div class="smsg" role="status"></div>';
+      var pend=s.state==='pending';
+      return (inDlg?'':'<h3>'+(pend?'One more step':'You\'re in ✓')+'</h3>')+'<p>'+(pend?'Check your inbox at <b>'+esc(s.email)+'</b> and tap the confirm link. Not there? Peek in spam or promotions.':'<b>'+esc(s.email)+'</b> is on the list. We\'ll email you when a new guide lands.')+'</p><button class="btn" type="button" data-act="unsub">Unsubscribe</button><div class="smsg" role="status"></div>';
     }
-    return (inDlg?'':'<h3>Get new guides first</h3><p>Leave your email and we will let you know when the next guide goes live. Free.</p>')+
+    return (inDlg?'':'<h3>Get new guides first</h3><p>Drop your email. We\'ll send a note when the next guide goes live. Free.</p>')+
       '<form class="sform" novalidate><input type="text" name="name" placeholder="First name (optional)" autocomplete="given-name" aria-label="First name">'+
       '<input type="email" name="email" required placeholder="you@email.com" autocomplete="email" aria-label="Email address">'+
-      '<button class="btn" type="submit">Join the list</button></form><div class="smsg" role="status"></div>'+
-      '<p style="margin:10px 0 0;font-size:.85rem;opacity:.8">We only use your email to tell you about Side Quest Club.</p>';
+      '<button class="btn" type="submit">Join the club</button></form><div class="smsg" role="status"></div>'+
+      '<p style="margin:10px 0 0;font-size:.85rem;opacity:.8">Just guides from us. No spam, and we never sell your email.</p>';
   }
   function renderSignup(){
     [].forEach.call(document.querySelectorAll('.signup-slot'),function(slot){
       var d=slot.hasAttribute('data-dialog');
       slot.innerHTML=d?signupInner(true):'<div class="signup">'+signupInner(false)+'</div>';
     });
-    document.getElementById('joinBtn').textContent=S.signup?'On the list ✓':'Join the list';
+    document.getElementById('joinBtn').textContent=S.signup?'In the club ✓':'Join the club';
   }
   function msg(el,t){var m=el&&el.querySelector?el.querySelector('.smsg'):null; if(m) m.textContent=t; else toast(t);}
 
@@ -143,13 +145,13 @@
     if(S.busy.like) return; S.busy.like=1;
     var next=Object.assign({},S.mine); if(next[a]) delete next[a]; else next[a]=true;
     var ok=false;
-    if(S.db&&S.canWrite){ ok=await writeDoc('likes/'+S.uid,{a:next,t:Date.now()},false); if(!ok) toast('Could not save your like. Kept on this device.'); }
+    if(S.db&&S.canWrite){ ok=await writeDoc('likes/'+S.uid,{a:next,t:Date.now()},false); if(!ok) toast('Couldn\'t save that like. It\'s kept on this device.'); }
     S.mine=next; lsSet('sqc_mine',next); S.busy.like=0; renderActions();
   }
   async function toggleSave(a){
     if(S.busy.save) return; S.busy.save=1;
     var next=Object.assign({},S.saved); if(next[a]) delete next[a]; else next[a]=true;
-    if(S.db&&S.canWrite&&S.uid){ var ok=await writeDoc('data/users/'+S.uid+'/prefs',{saved:next},false); if(!ok) toast('Could not sync your save. Kept on this device.'); }
+    if(S.db&&S.canWrite&&S.uid){ var ok=await writeDoc('data/users/'+S.uid+'/prefs',{saved:next},false); if(!ok) toast('Couldn\'t sync that save. It\'s kept on this device.'); }
     S.saved=next; lsSet('sqc_saved',next); S.busy.save=0; renderActions();
   }
   function copyText(t){
@@ -167,39 +169,67 @@
     var el=document.querySelector('[data-view="'+a+'"] article')||document.querySelector('[data-view="'+a+'"]');
     S.comments.openComposer({element:el}).then(function(r){ if(!r.opened) toast('Click on the page and try again.'); },function(){ toast('Comments are off for your account here.'); });
   }
+  async function unsub(){
+    if(!S.signup) return;
+    var email=S.signup.email;
+    var ep=(typeof SIGNUP_ENDPOINT!=='undefined')?SIGNUP_ENDPOINT:'';
+    try{
+      if(ep){
+        var res=await fetch(ep,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'unsubscribe',email:email})});
+        var j=await res.json(); if(!j||!j.ok) throw new Error('bad');
+      } else if(S.db&&S.canWrite&&S.uid){
+        await S.db.doc('signups/'+S.uid).delete();
+      } else { throw new Error('na'); }
+      S.signup=null; lsSet('sqc_signup',null); renderSignup(); toast('Done. You\'re unsubscribed. No hard feelings.');
+    }catch(e){ toast('Hmm, that didn\'t go through. Try again?'); }
+  }
+  async function verifySignup(){
+    var ep=(typeof SIGNUP_ENDPOINT!=='undefined')?SIGNUP_ENDPOINT:'';
+    if(!ep||!S.signup||!S.signup.email) return;
+    try{
+      var res=await fetch(ep,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'status',email:S.signup.email})});
+      var j=await res.json();
+      if(!j||!j.ok) return;
+      if(j.state==='none'){ S.signup=null; lsSet('sqc_signup',null); renderSignup(); }
+      else if(S.signup.state!==j.state){ S.signup.state=j.state; lsSet('sqc_signup',S.signup); renderSignup(); }
+    }catch(e){}
+  }
   async function setNews(){
     if(!S.signup||!S.db||!S.canWrite) return;
     var v=!S.signup.newsletter;
     var ok=await writeDoc('signups/'+S.uid,{newsletter:v},true);
-    if(!ok) toast('Could not update. Try again.');
+    if(!ok) toast('Hmm, that didn\'t go through. Try again?');
   }
   async function submitSignup(form){
     var email=(form.elements.email.value||'').trim(), name=(form.elements.name.value||'').trim().slice(0,60);
     var holder=form.parentNode;
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){msg(holder,'Please enter a valid email.');return;}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){msg(holder,'That email looks off. Mind checking it?');return;}
     if(SIGNUP_ENDPOINT){
       var b0=form.querySelector('button[type=submit]'); b0.disabled=true;
       try{
         var rec={email:email.slice(0,120),name:name,newsletter:true,source:cur};
         var res=await fetch(SIGNUP_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(rec)});
         if(!res.ok) throw new Error('bad');
-        S.signup=rec; lsSet('sqc_signup',rec); renderSignup(); toast('Welcome to the club.');
-      }catch(err){ msg(holder,'Could not sign you up. Please try again.'); }
+        var jj={}; try{ jj=await res.json(); }catch(x){}
+        if(jj&&jj.state==='none'){ msg(holder,'We couldn\'t add this email. If you unsubscribed before, write to us and we\'ll sort it out.'); b0.disabled=false; return; }
+        rec.state=(jj&&jj.state)||'active';
+        S.signup=rec; lsSet('sqc_signup',rec); renderSignup(); toast('You\'re in. Welcome to the club.');
+      }catch(err){ msg(holder,'Hmm, that didn\'t go through. Try again?'); }
       b0.disabled=false; return;
     }
-    if(!S.db||!S.uid||!S.canWrite){msg(holder,'Sign-ups are opening soon. Please check back shortly.');return;}
+    if(!S.db||!S.uid||!S.canWrite){msg(holder,'Sign-ups open very soon. Check back in a bit.');return;}
     var btn=form.querySelector('button[type=submit]'); btn.disabled=true;
     var v=cur;
     var ok=await writeDoc('signups/'+S.uid,{email:email.slice(0,120),name:name,newsletter:true,createdAt:new Date().toISOString(),source:v},false);
     btn.disabled=false;
-    if(!ok){msg(holder,'Could not save. Please try again.');return;}
-    toast('Welcome to the club.');
+    if(!ok){msg(holder,'Hmm, that didn\'t go through. Try again?');return;}
+    toast('You\'re in. Welcome to the club.');
   }
 
   document.addEventListener('click',function(e){
     var b=e.target.closest('[data-act]'); if(!b) return;
     var act=b.getAttribute('data-act'), a=b.getAttribute('data-a');
-    if(act==='like') toggleLike(a); else if(act==='save') toggleSave(a); else if(act==='share') share(a); else if(act==='comment') comment(a); else if(act==='news') setNews();
+    if(act==='like') toggleLike(a); else if(act==='save') toggleSave(a); else if(act==='share') share(a); else if(act==='comment') comment(a); else if(act==='news') setNews(); else if(act==='unsub') unsub();
   });
   document.addEventListener('submit',function(e){ if(e.target.classList.contains('sform')){ e.preventDefault(); submitSignup(e.target); } });
   var dlg=document.getElementById('joinDlg');
@@ -211,7 +241,7 @@
   [].forEach.call(document.querySelectorAll('[data-view]'),function(v){ var d=document.createElement('div'); d.className='signup-slot'; v.appendChild(d); });
   var firstBlock=document.querySelector('[data-view="home"] .block');
   if(firstBlock){ var sb=document.createElement('div'); sb.id='savedBox'; sb.hidden=true; sb.style.marginBottom='18px'; firstBlock.insertBefore(sb,firstBlock.firstChild); }
-  renderActions(); renderSignup();
+  renderActions(); renderSignup(); verifySignup();
 
   /* capabilities light up later; the page works without them */
   (async function(){

@@ -27,7 +27,8 @@
     <a href="/ideas/" data-nav="ideas">10 ideas</a>
     <a href="/test/" data-nav="test">Test for $50</a>
     <a href="/map/" data-nav="map">Factory map</a>
-    <button class="btn solid" type="button" id="joinBtn" style="padding:4px 12px">Join the list</button>
+    <a href="/career/" data-nav="career">Career minimalism</a>
+    <button class="btn solid" type="button" id="joinBtn" style="padding:4px 12px">Join the club</button>
   </nav>
 </header>
 <main>
@@ -44,6 +45,13 @@
       <b>DAY<br>001</b>
       <div class="stamp" aria-hidden="true">APPROVED<br>by us</div>
       <small>Your first day counts.</small>
+    </div>
+  </div>
+
+  <div class="block">
+    <span class="label" id="latestLabel">Article of the day</span>
+    <div class="grid3" id="latest">
+      <a class="post-card" href="/career/"><span class="tape"></span><span class="n">NEW</span><h3>Career minimalism: what if the ladder isn't the goal?</h3><p>Gen Z is rethinking what work is for. Here's what career minimalism is, and what it looks like.</p><span class="meta">Essay · 4 min</span></a>
     </div>
   </div>
 
@@ -67,8 +75,8 @@
 <dialog id="joinDlg" aria-labelledby="joinTitle">
   <div class="dbody">
     <button class="x" type="button" id="joinX" aria-label="Close">✕</button>
-    <h3 id="joinTitle" style="font-size:1.6rem">Join the list</h3>
-    <p style="margin:8px 0 14px">Free. Leave your email and we will let you know when new guides go live.</p>
+    <h3 id="joinTitle" style="font-size:1.6rem">Join the club</h3>
+    <p style="margin:8px 0 14px">Free. We'll email you when a new guide lands.</p>
     <div class="signup-slot" data-dialog="1"></div>
   </div>
 </dialog>
@@ -79,5 +87,6 @@
 </footer>
 </div>
 <script src="/assets/app.js"></script>
+<script src="/assets/posts.js"></script>
 </body>
 </html>

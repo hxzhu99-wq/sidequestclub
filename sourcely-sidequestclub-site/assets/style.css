@@ -73,6 +73,8 @@ article h1{margin-block:10px 16px}
 article .intro{font-size:1.2rem}
 article h2{margin-block:36px 10px;font-size:clamp(1.4rem,3.4vw,1.9rem)}
 article p{margin-block:0 14px}
+article ul,article ol{margin-block:0 14px;padding-left:1.4em}
+article li{margin-block:4px}
 .idea{border-top:3px solid var(--line);padding-block:20px;display:grid;grid-template-columns:64px minmax(0,1fr);gap:4px 16px}
 .idea .num{font-family:var(--display);font-size:2.2rem;line-height:1;grid-row:span 3}
 .idea h3{font-size:1.35rem}
